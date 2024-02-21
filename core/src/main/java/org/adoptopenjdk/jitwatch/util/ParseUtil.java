@@ -1119,23 +1119,9 @@ public final class ParseUtil
 				metaClass = model.buildAndGetMetaClass(clazz);
 			}
 		}
-		catch (ClassNotFoundException cnf)
+		catch (Exception r)
 		{
-			if (!possibleLambdaMethod(metaClassName))
-			{
-				logger.error("ClassNotFoundException: '" + metaClassName + C_QUOTE);
-			}
-		}
-		catch (NoClassDefFoundError ncdf)
-		{
-			logger.error("NoClassDefFoundError: '" + metaClassName + C_SPACE + ncdf.getMessage() + C_QUOTE);
-		}
-		catch (IllegalAccessError iae)
-		{
-			if (!isVMInternalClass(metaClassName))
-			{
-				logger.error("IllegalAccessError: '" + metaClassName + C_SPACE + iae.getMessage() + C_QUOTE);
-			}
+			metaClass = model.buildAndGetMetaClass(metaClassName, false, null, null);
 		}
 
 		return metaClass;

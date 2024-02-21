@@ -617,6 +617,13 @@ public abstract class AbstractLogParser implements ILogParser
 				break;
 			}
 		}
+		else
+		{
+			if (type == EventType.TASK)
+			{
+				System.out.println("Not found:" + signature);
+			}
+		}
 	}
 
 	protected void handleTaskDone(Tag tagTaskDone, IMetaMember member)

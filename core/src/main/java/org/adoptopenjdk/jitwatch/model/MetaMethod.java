@@ -15,6 +15,7 @@ import java.util.List;
 public class MetaMethod extends AbstractMetaMember
 {
     private String methodToString;
+    private MemberSignatureParts msp;
 
     public MetaMethod(Method method, MetaClass methodClass)
     {
@@ -37,6 +38,29 @@ public class MetaMethod extends AbstractMetaMember
         if (DEBUG_MEMBER_CREATION)
         {
         	logger.debug("Created MetaMethod: {}", toString());
+        }
+    }
+
+    public MetaMethod(MemberSignatureParts msp, MetaClass metaClass)
+    {
+        super(msp.getMemberName());
+
+        this.msp = msp;
+        this.methodToString = msp.toStringSingleLine();
+        this.metaClass = metaClass;
+
+        returnType = Void.TYPE;
+        paramTypes = Arrays.asList();
+
+        // Can include non-method modifiers such as volatile so AND with
+        // acceptable values
+        modifier = Modifier.PUBLIC;
+
+        isVarArgs = false;
+
+        if (DEBUG_MEMBER_CREATION)
+        {
+            logger.debug("Created MetaMethod: {}", toString());
         }
     }
 
@@ -63,5 +87,15 @@ public class MetaMethod extends AbstractMetaMember
         }
 
         return methodSigWithoutThrows;
+    }
+
+    @Override
+    public boolean matchesSignature(MemberSignatureParts msp, boolean matchTypesExactly)
+    {
+        if (this.msp == null)
+        {
+            return super.matchesSignature(msp, matchTypesExactly);
+        }
+        return this.msp.equals(msp);
     }
 }

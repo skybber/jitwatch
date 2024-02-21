@@ -8,6 +8,7 @@ package org.adoptopenjdk.jitwatch.model;
 import static org.adoptopenjdk.jitwatch.core.JITWatchConstants.ATTR_COMPILER;
 import static org.adoptopenjdk.jitwatch.core.JITWatchConstants.ATTR_COMPILE_ID;
 import static org.adoptopenjdk.jitwatch.core.JITWatchConstants.ATTR_COMPILE_KIND;
+import static org.adoptopenjdk.jitwatch.core.JITWatchConstants.ATTR_LEVEL;
 import static org.adoptopenjdk.jitwatch.core.JITWatchConstants.C1;
 import static org.adoptopenjdk.jitwatch.core.JITWatchConstants.C2;
 import static org.adoptopenjdk.jitwatch.core.JITWatchConstants.C2N;
@@ -193,6 +194,27 @@ public class JITDataModel implements IReadOnlyJITDataModel
 			}
 		}
 
+		String level = attrs.get(ATTR_LEVEL);
+
+		if (level != null)
+		{
+			if ("1".equals(level))
+			{
+				stats.incCountLevel1();
+			} else if ("2".equals(level))
+			{
+				stats.incCountLevel2();
+			} else if ("3".equals(level))
+			{
+				stats.incCountLevel3();
+			} else if ("4".equals(level))
+			{
+				stats.incCountLevel4();
+			}
+		} else {
+			stats.incCountLevel4();
+		}
+
 		String compiler = attrs.get(ATTR_COMPILER);
 
 		if (compiler != null)
@@ -200,8 +222,7 @@ public class JITDataModel implements IReadOnlyJITDataModel
 			if (C1.equalsIgnoreCase(compiler))
 			{
 				stats.incCountC1();
-			}
-			else if (C2.equalsIgnoreCase(compiler))
+			} else if (C2.equalsIgnoreCase(compiler))
 			{
 				stats.incCountC2();
 			}
@@ -274,6 +295,25 @@ public class JITDataModel implements IReadOnlyJITDataModel
 					break;
 				}
 			}
+
+			if (result == null)
+			{
+				String name = msp.getMemberName();
+				if (msp.getMemberName().equals("<init>"))
+				{
+					MetaConstructor metaConstructor = new MetaConstructor(msp, metaClass);
+					metaClass.addMember(metaConstructor);
+					result = metaConstructor;
+					stats.incCountMethod();
+				}
+				else
+				{
+					MetaMethod metaMethod = new MetaMethod(msp, metaClass);
+					metaClass.addMember(metaMethod);
+					result = metaMethod;
+					stats.incCountMethod();
+				}
+			}
 		}
 		else
 		{
@@ -288,9 +328,13 @@ public class JITDataModel implements IReadOnlyJITDataModel
 
 	@Override public MetaClass buildAndGetMetaClass(Class<?> clazz)
 	{
-		MetaClass resultMetaClass = null;
+		return buildAndGetMetaClass(clazz.getName(), clazz.isInterface(), clazz.getDeclaredMethods(), clazz.getDeclaredConstructors());
+	}
 
-		String fqClassName = clazz.getName();
+	@Override public MetaClass buildAndGetMetaClass(String fqClassName, boolean isInterface, Method[] declaredMethods,
+													Constructor<?>[] declaredConstructors)
+	{
+		MetaClass resultMetaClass = null;
 
 		String packageName;
 		String className;
@@ -328,7 +372,7 @@ public class JITDataModel implements IReadOnlyJITDataModel
 
 		stats.incCountClass();
 
-		if (clazz.isInterface())
+		if (isInterface)
 		{
 			resultMetaClass.setInterface(true);
 		}
@@ -339,18 +383,25 @@ public class JITDataModel implements IReadOnlyJITDataModel
 		try
 		{
 			// TODO HERE check for static
-			for (Method m : clazz.getDeclaredMethods())
+			if (declaredMethods != null)
 			{
-				MetaMethod metaMethod = new MetaMethod(m, resultMetaClass);
-				resultMetaClass.addMember(metaMethod);
-				stats.incCountMethod();
+				for (Method m : declaredMethods)
+				{
+					MetaMethod metaMethod = new MetaMethod(m, resultMetaClass);
+					resultMetaClass.addMember(metaMethod);
+					stats.incCountMethod();
+				}
 			}
 
-			for (Constructor<?> c : clazz.getDeclaredConstructors())
+
+			if (declaredConstructors != null)
 			{
-				MetaConstructor metaConstructor = new MetaConstructor(c, resultMetaClass);
-				resultMetaClass.addMember(metaConstructor);
-				stats.incCountConstructor();
+				for (Constructor<?> c : declaredConstructors)
+				{
+					MetaConstructor metaConstructor = new MetaConstructor(c, resultMetaClass);
+					resultMetaClass.addMember(metaConstructor);
+					stats.incCountConstructor();
+				}
 			}
 
 		}
