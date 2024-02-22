@@ -10,43 +10,45 @@ import static org.adoptopenjdk.jitwatch.core.JITWatchConstants.C_SPACE;
 
 import org.adoptopenjdk.jitwatch.util.StringUtil;
 
-public class JITEvent
-{
+public class JITEvent {
     private long stamp;
     private EventType eventType;
     private IMetaMember eventMember;
+    private int level;
 
-    public JITEvent(long stamp, EventType eventType, IMetaMember eventMember)
-    {
+    public JITEvent(long stamp, EventType eventType, IMetaMember eventMember, int level) {
         this.stamp = stamp;
         this.eventType = eventType;
         this.eventMember = eventMember;
+        this.level = level;
     }
 
-    public long getStamp()
-    {
+    public long getStamp() {
         return stamp;
     }
 
-    public EventType getEventType()
-    {
+    public EventType getEventType() {
         return eventType;
     }
 
-    public IMetaMember getEventMember()
-    {
+    public IMetaMember getEventMember() {
         return eventMember;
     }
 
-    @Override
-    public String toString()
+    public int getLevel()
     {
+        return level;
+    }
+
+    @Override
+
+    public String toString() {
         StringBuilder sb = new StringBuilder();
 
         sb.append(StringUtil.formatTimestamp(stamp, true)).append(C_SPACE);
 
         sb.append(StringUtil.alignRight(eventType.getText(), 14)).append(C_SPACE).append(C_COLON).append(C_SPACE);
-     
+
         sb.append(eventMember.toString());
 
         return sb.toString();

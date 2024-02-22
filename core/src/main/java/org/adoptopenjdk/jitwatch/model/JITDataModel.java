@@ -298,7 +298,6 @@ public class JITDataModel implements IReadOnlyJITDataModel
 
 			if (result == null)
 			{
-				String name = msp.getMemberName();
 				if (msp.getMemberName().equals("<init>"))
 				{
 					MetaConstructor metaConstructor = new MetaConstructor(msp, metaClass);
