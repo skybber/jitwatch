@@ -67,7 +67,11 @@ public class StatsStage extends Stage
 		obList.add(makeRow("OSR Compiled", stats.getCountOSR()));
 		obList.add(makeRow("C2N Compiled", stats.getCountC2N()));
 		obList.add(makeRow("Compiler Threads", stats.getCountCompilerThreads()));
-		
+		obList.add(makeRow("Level1 Compiled", stats.getCountLevel1()));
+		obList.add(makeRow("Level2 Compiled", stats.getCountLevel2()));
+		obList.add(makeRow("Level3 Compiled", stats.getCountLevel3()));
+		obList.add(makeRow("Level4 Compiled", stats.getCountLevel4()));
+
 		
 		// * = Only have the queued timestamp and compiled timestamp
 		// JIT Time assumes the entire interval was spent compiling

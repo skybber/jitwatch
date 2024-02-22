@@ -367,6 +367,11 @@ public class TimeLineStage extends AbstractGraphStage
 		compiledStatsBuilder.append(" (C2: ").append(stats.getCountC2()).append(S_CLOSE_PARENTHESES);
 		compiledStatsBuilder.append(" (C2N: ").append(stats.getCountC2N()).append(S_CLOSE_PARENTHESES);
 		compiledStatsBuilder.append(" (OSR: ").append(stats.getCountOSR()).append(S_CLOSE_PARENTHESES);
+		compiledStatsBuilder.append(" (L1: ").append(stats.getCountLevel1()).append(S_CLOSE_PARENTHESES);
+		compiledStatsBuilder.append(" (L2: ").append(stats.getCountLevel2()).append(S_CLOSE_PARENTHESES);
+		compiledStatsBuilder.append(" (L3: ").append(stats.getCountLevel3()).append(S_CLOSE_PARENTHESES);
+		compiledStatsBuilder.append(" (L4: ").append(stats.getCountLevel4()).append(S_CLOSE_PARENTHESES);
+
 
 		setStrokeForText();
 		gc.fillText(compiledStatsBuilder.toString(), fix(graphGapLeft), fix(2));
