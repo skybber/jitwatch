@@ -267,15 +267,6 @@ public class TimeLineStage extends AbstractGraphStage
 		{
 			Map<String, String> eventAttributes = nextJournalEvent.getAttributes();
 
-//			if (eventAttributes.containsKey(ATTR_DECOMPILES))
-//			{
-//				selectedItemBuilder.append("Recompiled");
-//			}
-//			else
-//			{
-//				selectedItemBuilder.append("Compiled");
-//			}
-
 			String compiler = eventAttributes.get(ATTR_COMPILER);
 
 			if (compiler == null)
@@ -316,10 +307,10 @@ public class TimeLineStage extends AbstractGraphStage
 
 	private void drawEvents(List<JITEvent> events)
 	{
-		Color colourMarker = Color.BLUE;
+		Color colourTotal = Color.BLACK;
 		double lineWidth = 2.0;
 
-		int cumC = 0;
+		int cumTotal = 0;
 
 		double lastCX = graphGapLeft + normaliseX(minX);
 		double lastCY = graphGapTop + normaliseY(0);
@@ -328,11 +319,11 @@ public class TimeLineStage extends AbstractGraphStage
 		{
 			long stamp = event.getStamp();
 
-			cumC++;
+			cumTotal++;
 
 			double x = graphGapLeft + normaliseX(stamp);
 
-			double y = graphGapTop + normaliseY(cumC);
+			double totalY = graphGapTop + normaliseY(cumTotal);
 
 			if (selectedMember != null)
 			{
@@ -340,21 +331,57 @@ public class TimeLineStage extends AbstractGraphStage
 
 				if (!compilations.isEmpty())
 				{
-					drawMemberEvents(compilations, stamp, y);
+					drawMemberEvents(compilations, stamp, totalY);
 				}
 			}
 
-			gc.setStroke(colourMarker);
 			gc.setLineWidth(lineWidth);
-			gc.strokeLine(fix(lastCX), fix(lastCY), fix(x), fix(y));
+			gc.setStroke(colourTotal);
+			gc.strokeLine(fix(lastCX), fix(lastCY), fix(x), fix(totalY));
 
 			lastCX = x;
-			lastCY = y;
+			lastCY = totalY;
 		}
 
-		continueLineToEndOfXAxis(lastCX, lastCY, colourMarker, lineWidth);
+		continueLineToEndOfXAxis(lastCX, lastCY, colourTotal, lineWidth);
+
+		drawLevelGraph(1, events, Color.BLUE, lineWidth);
+		drawLevelGraph(2, events, Color.RED, lineWidth);
+		drawLevelGraph(3, events, Color.VIOLET, lineWidth);
+		drawLevelGraph(4, events, Color.GREEN, lineWidth);
 
 		showStatsLegend(gc);
+	}
+
+	private void drawLevelGraph(int level, List<JITEvent> events, Color color, double lineWidth)
+	{
+		int cumLevel = 0;
+
+		double lastCX = graphGapLeft + normaliseX(minX);
+		double lastCY = graphGapTop + normaliseY(0);
+
+		for (JITEvent event : events)
+		{
+			if (event.getLevel() == level)
+			{
+				cumLevel++;
+			}
+
+			long stamp = event.getStamp();
+
+			double x = graphGapLeft + normaliseX(stamp);
+
+			double totalY = graphGapTop + normaliseY(cumLevel);
+
+			gc.setLineWidth(lineWidth);
+			gc.setStroke(color);
+			gc.strokeLine(fix(lastCX), fix(lastCY), fix(x), fix(totalY));
+
+			lastCX = x;
+			lastCY = totalY;
+		}
+
+		continueLineToEndOfXAxis(lastCX, lastCY, color, lineWidth);
 	}
 
 	private void showStatsLegend(GraphicsContext gc)
@@ -363,14 +390,16 @@ public class TimeLineStage extends AbstractGraphStage
 
 		StringBuilder compiledStatsBuilder = new StringBuilder();
 		compiledStatsBuilder.append("Total Compilations: ").append(stats.getTotalCompiledMethods());
+		/*
 		compiledStatsBuilder.append(" (C1: ").append(stats.getCountC1()).append(S_CLOSE_PARENTHESES);
 		compiledStatsBuilder.append(" (C2: ").append(stats.getCountC2()).append(S_CLOSE_PARENTHESES);
 		compiledStatsBuilder.append(" (C2N: ").append(stats.getCountC2N()).append(S_CLOSE_PARENTHESES);
+		 */
 		compiledStatsBuilder.append(" (OSR: ").append(stats.getCountOSR()).append(S_CLOSE_PARENTHESES);
-		compiledStatsBuilder.append(" (L1: ").append(stats.getCountLevel1()).append(S_CLOSE_PARENTHESES);
-		compiledStatsBuilder.append(" (L2: ").append(stats.getCountLevel2()).append(S_CLOSE_PARENTHESES);
-		compiledStatsBuilder.append(" (L3: ").append(stats.getCountLevel3()).append(S_CLOSE_PARENTHESES);
-		compiledStatsBuilder.append(" (L4: ").append(stats.getCountLevel4()).append(S_CLOSE_PARENTHESES);
+		compiledStatsBuilder.append(" (L1[blue]: ").append(stats.getCountLevel1()).append(S_CLOSE_PARENTHESES);
+		compiledStatsBuilder.append(" (L2[red]: ").append(stats.getCountLevel2()).append(S_CLOSE_PARENTHESES);
+		compiledStatsBuilder.append(" (L3[violet]: ").append(stats.getCountLevel3()).append(S_CLOSE_PARENTHESES);
+		compiledStatsBuilder.append(" (L4[green]: ").append(stats.getCountLevel4()).append(S_CLOSE_PARENTHESES);
 
 
 		setStrokeForText();
